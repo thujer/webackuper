@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# (c) Tomas Hujer
+#
+# Bash backup file configuration
+#
+
+# Domain
+DOMAIN="domain.xx"
+
+# Warning mail subject
+MAIL_SUBJECT="$DOMAIN backup"
+
+# Warning mail recipients
+MAIL_RECIPIENTS="target@mail.xx"
+
+# -------------------------------------------------------------------------
+# Database properties
+# -------------------------------------------------------------------------
+DB_BACKUP_NAME="database_name"
+DB_BACKUP_USER="username"
+DB_BACKUP_PASS="password"
+DB_BACKUP_FILENAME="db_"`date +%y%m%d_%H%M%S`".sql.gz"
+DB_BACKUP_DIR_LOCAL="/var/backup/$DOMAIN"
+DB_BACKUP_FILENAME_LOCAL="$DB_BACKUP_DIR_LOCAL/$DB_BACKUP_FILENAME"
+
+# Minimum database backup file size
+DB_BACKUP_FILESIZE_MIN=20000
+
+# -------------------------------------------------------------------------
+# Backup files & directories
+# -------------------------------------------------------------------------
+FS_BACKUP_SOURCE_DIR="/var/www/$DOMAIN/web"
+FS_BACKUP_TARGET_DIR="/var/backup/$DOMAIN"
+FS_BACKUP_FILENAME='www_'`date +%y%m%d_%H%M%S`'.tar.gz'
+FS_BACKUP_TARGET_FILENAME="$FS_BACKUP_TARGET_DIR/$FS_BACKUP_FILENAME"
+FS_BACKUP_FILESIZE_MIN=5000000
+
+# -------------------------------------------------------------------------
+# Check drive space left
+# -------------------------------------------------------------------------
+# Minimum percent of free space on drive
+FREE_SPACE_THRESHOLD=80
+
+# -------------------------------------------------------------------------
+# Log file
+# -------------------------------------------------------------------------
+LOG_DIR="/var/log/backup/$DOMAIN"
+LOG_FILE="$LOG_DIR/"`date +%y%m%d_%H%M%S`".log"
+LOG_FILE_ERROR="$LOG_DIR/"`date +%y%m%d_%H%M%S`"_err.log"
+
+# -------------------------------------------------------------------------
+# FTP STORAGE
+# -------------------------------------------------------------------------
+FTP_HOST='ftp.xxx.cz'
+FTP_USER='usr'
+FTP_PASS='xxx'
+FTP_REMOTE_DIR="/$DOMAIN"
+
+# -------------------------------------------------------------------------
+# RSYNC STORAGE
+# -------------------------------------------------------------------------
+RSYNC_TARGET_DIR="rsync://user@server.xx/dir/$DOMAIN"
+RSYNC_PASS_FILE="/root/pass/wedos_disk"
+

@@ -134,7 +134,7 @@ function uploadBackupToNASByFTP() {
 # ------------- UPLOAD TO NAS/RSYNC ------------------
 function rsyncToNASbySSH() {
     echo 'Uploading to NAS by RSYNC ...' >> $LOG_FILE
-    rsync -a --password-file=$RSYNC_PASS_FILE $FS_BACKUP_TARGET_DIR $RSYNC_TARGET_DIR 2>$LOG_FILE_ERROR >> $LOG_FILE
+    rsync -a --password-file=$RSYNC_PASS_FILE $FS_BACKUP_TARGET_DIR/ $RSYNC_TARGET_DIR 2>$LOG_FILE_ERROR >> $LOG_FILE
 
     # Zjisti velikost chyboveho vystupu
     RSYNC_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
@@ -165,15 +165,12 @@ fi
 
 for CONFIG_FILE in /root/backup_cron/$1/*.cfg; do
 
-    echo $CONFIG_FILE
     EMAIL_MESSAGE=""
 
     if [ -f $CONFIG_FILE ]; then
 	# Load config file
 	source $CONFIG_FILE
 	echo "Processing $CONFIG_FILE file.." >> $LOG_FILE
-	echo $LOG_FILE
-
 
 	if [ ! -f $LOG_DIR ]; then
 	    mkdir -p $LOG_DIR
@@ -195,7 +192,7 @@ for CONFIG_FILE in /root/backup_cron/$1/*.cfg; do
 	rsyncToNASbySSH
 
 	# Remove old backups
-	#removeOldFiles
+	removeOldFiles
 
     fi
 done
