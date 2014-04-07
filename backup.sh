@@ -72,14 +72,14 @@ function backupDB {
     DB_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
     if(($DB_ERROR_FILESIZE > 0)); then
 	EMAIL_MESSAGE="$EMAIL_MESSAGE Chyba při zálohování databáze $DB_BACKUP_NAME: `cat $LOG_FILE_ERROR`. "
-	ECHO "$EMAIL_MESSAGE"  >> $LOG_FILE
+	echo "$EMAIL_MESSAGE"  >> $LOG_FILE
     fi
 
     # Zjisti velikost souboru zalohy
     DB_BACKUP_FILESIZE=$(stat -c%s "$DB_BACKUP_FILENAME_LOCAL")
     if(($DB_BACKUP_FILESIZE < $DB_BACKUP_FILESIZE_MIN)); then
         EMAIL_MESSAGE="$EMAIL_MESSAGE Soubor zálohy databáze je podezřele malý: $DB_BACKUP_FILESIZE b. "
-	ECHO "$EMAIL_MESSAGE" >> $LOG_FILE
+	echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # If any result, than send result text by mail
@@ -101,14 +101,14 @@ function backupFilesystem() {
     FS_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
     if(($FS_ERROR_FILESIZE > 0)); then
 	EMAIL_MESSAGE="$EMAIL_MESSAGE Chyba při zalohovani filesystemu $FS_BACKUP_SOURCE_DIR `cat $LOG_FILE_ERROR` ! "
-	ECHO "$EMAIL_MESSAGE" >> $LOG_FILE
+	echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # Zjisti velikost souboru zalohy
     FS_BACKUP_FILESIZE=$(stat -c%s "$FS_BACKUP_TARGET_FILENAME")
     if(($FS_BACKUP_FILESIZE < $FS_BACKUP_FILESIZE_MIN)); then
         EMAIL_MESSAGE="$EMAIL_MESSAGE Soubor zálohy filesystemu je podezřele malý: $FS_BACKUP_FILESIZE bytes. "
-	ECHO "$EMAIL_MESSAGE" >> $LOG_FILE
+	echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # If any result, than send result text by mail
@@ -121,7 +121,7 @@ function backupFilesystem() {
 
 
 # --------------- REMOVE OLD FILES ----------------------
-function removeOldFile() {
+function removeOldFiles() {
     echo "Removing old files..." >> $LOG_FILE
     find /var/backup/$DOMAIN/ -maxdepth 1 -type f -mtime +7 -exec rm -rf {} \; 2>&1 >> $LOG_FILE
 }
@@ -144,7 +144,7 @@ function rsyncToNASbySSH() {
     RSYNC_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
     if(($RSYNC_ERROR_FILESIZE > 0)); then
 	EMAIL_MESSAGE="Chyba při odesilani zaloh pres rsync: `cat $LOG_FILE_ERROR`, zdrojovy adresar: $FS_BACKUP_TARGET_DIR ! "
-	ECHO "$EMAIL_MESSAGE" >> $LOG_FILE
+	echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # If any result, than send result text by mail
