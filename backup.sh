@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# (c) Tomas Hujer
+# Copyright (c) 2013-2014 Tomas Hujer
 #
 
 
@@ -90,33 +90,48 @@ function backupDB {
     fi
 }
 
+# -------------- BACKUP FILESYSTEM DIR ------------------
+# $1 ... source dir path
+function backupDir() {
 
-# ------------- BACKUP FILESYSTEM -------------------
-function backupFilesystem() {
-
-    echo "Compressing filesystem..." >> $LOG_FILE
-    tar -pczPf $FS_BACKUP_TARGET_FILENAME $FS_BACKUP_SOURCE_DIR 2>$LOG_FILE_ERROR >> $LOG_FILE
+    FS_TARGET_FILE="$FS_BACKUP_TARGET_DIR/$DOMAIN/$2_$NOW.tar.gz"
+    FS_SOURCE_DIR="$FS_BACKUP_SOURCE_DIR/$1"
+    mkdir -p $FS_BACKUP_TARGET_DIR/$DOMAIN
+    echo "Compressing filesystem...$FS_SOURCE_DIR TO $FS_TARGET_FILE" >> $LOG_FILE
+    tar -pczPf $FS_TARGET_FILE $FS_SOURCE_DIR 2>$LOG_FILE_ERROR >> $LOG_FILE
 
     # Zjisti velikost chyboveho vystupu
     FS_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
     if(($FS_ERROR_FILESIZE > 0)); then
-	EMAIL_MESSAGE="$EMAIL_MESSAGE Chyba při zalohovani filesystemu $FS_BACKUP_SOURCE_DIR `cat $LOG_FILE_ERROR` ! "
-	echo "$EMAIL_MESSAGE" >> $LOG_FILE
+    EMAIL_MESSAGE="$EMAIL_MESSAGE Chyba pri zalohovani filesystemu $FS_SOURCE_DIR `cat $LOG_FILE_ERROR` ! "
+    echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # Zjisti velikost souboru zalohy
-    FS_BACKUP_FILESIZE=$(stat -c%s "$FS_BACKUP_TARGET_FILENAME")
+    FS_BACKUP_FILESIZE=$(stat -c%s "$FS_TARGET_FILE")
     if(($FS_BACKUP_FILESIZE < $FS_BACKUP_FILESIZE_MIN)); then
-        EMAIL_MESSAGE="$EMAIL_MESSAGE Soubor zálohy filesystemu je podezřele malý: $FS_BACKUP_FILESIZE bytes. "
-	echo "$EMAIL_MESSAGE" >> $LOG_FILE
+        EMAIL_MESSAGE="$EMAIL_MESSAGE Soubor zálohy filesystemu je poderele malý: $FS_BACKUP_FILESIZE bytes. "
+    echo "$EMAIL_MESSAGE" >> $LOG_FILE
     fi
 
     # If any result, than send result text by mail
     if [ "$EMAIL_MESSAGE" != "" ]; then
-	mail -s $MAIL_SUBJECT $MAIL_RECIPIENTS <<< $EMAIL_MESSAGE
+    mail -s $MAIL_SUBJECT $MAIL_RECIPIENTS <<< $EMAIL_MESSAGE
     else
-	echo "Ok" >> $LOG_FILE
+    echo "Ok" >> $LOG_FILE
     fi
+}
+
+
+# ------------- BACKUP FILESYSTEM -------------------
+function backupFilesystem() {
+    
+    for SOURCE_DIR in "${!FS_BACKUP_SUBDIR_ARRAY[@]}"
+    do
+	#echo Backup dir $SOURCE_DIR TO ${FS_BACKUP_SUBDIR_ARRAY[$SOURCE_DIR]} >> $LOG_FILE
+	#echo Backup dir $SOURCE_DIR TO ${FS_BACKUP_SUBDIR_ARRAY[$SOURCE_DIR]}
+        backupDir ${FS_BACKUP_SUBDIR_ARRAY[$SOURCE_DIR]} $SOURCE_DIR
+    done
 }
 
 
@@ -168,14 +183,17 @@ if [ "$1" == "" ]; then
 fi
 
 
-for CONFIG_FILE in /root/backup_cron/$1/*.cfg; do
+for CONFIG_FILE in /root/webackuper_plans/$1/*.cfg; do
 
     EMAIL_MESSAGE=""
 
     if [ -f $CONFIG_FILE ]; then
 	# Load config file
 	source $CONFIG_FILE
+	mkdir -p $LOG_DIR
 	echo "Processing $CONFIG_FILE file.." >> $LOG_FILE
+
+	NOW=$(date +"%y%d%m_%H%M%S")
 
 	if [ ! -f $LOG_DIR ]; then
 	    mkdir -p $LOG_DIR
@@ -194,7 +212,7 @@ for CONFIG_FILE in /root/backup_cron/$1/*.cfg; do
 
 	# Upload
 	#uploadBackupToNASByFTP
-	rsyncToNASbySSH
+	#rsyncToNASbySSH
 
 	# Remove old backups
 	removeOldFiles
