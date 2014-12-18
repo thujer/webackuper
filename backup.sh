@@ -163,7 +163,7 @@ function done() {
 
 
 if [ "$1" == "" ]; then
-    echo "Parametr musi byt typ casoveho udaje - podadresar s casovym ID, napr. daily"
+    echo "Parametr musi byt typ casoveho udaje - podadresar s casovym ID, napr. daily nebo every_three_days"
     exit
 fi
 
