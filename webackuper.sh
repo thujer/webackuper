@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2013-2014 Tomas Hujer
+# Copyright (c) 2013-2015 Tomas Hujer
 #
 
 
@@ -66,7 +66,7 @@ function backupDB {
     echo "Dumping database $DB_BACKUP_NAME to $DB_BACKUP_FILENAME_LOCAL ... " >> $LOG_FILE
 
     # mysqldump vraci chybovy status ve vystupu ID 3
-    mysqldump -u $DB_BACKUP_USER -p$DB_BACKUP_PASS --databases $DB_BACKUP_NAME --routines 2>$LOG_FILE_ERROR | gzip -9 > $DB_BACKUP_FILENAME_LOCAL
+    mysqldump -h $DB_BACKUP_HOST -u $DB_BACKUP_USER -p$DB_BACKUP_PASS --databases $DB_BACKUP_NAME --routines 2>$LOG_FILE_ERROR | gzip -9 > $DB_BACKUP_FILENAME_LOCAL
 
     # Zjisti velikost chyboveho vystupu
     DB_ERROR_FILESIZE=$(stat -c%s "$LOG_FILE_ERROR")
@@ -138,7 +138,7 @@ function backupFilesystem() {
 # --------------- REMOVE OLD FILES ----------------------
 function removeOldFiles() {
     echo "Removing old files..." >> $LOG_FILE
-    find /var/backup/$DOMAIN/ -maxdepth 1 -type f -mtime +7 -exec rm -rf {} \; 2>&1 >> $LOG_FILE
+    find $FS_BACKUP_TARGET_DIR/$DOMAIN/ -maxdepth 1 -type f -mtime +$FS_REMOVE_OLDEST_FILES_AFTER_DAYS -exec rm -rf {} \; 2>&1 >> $LOG_FILE
 }
 
 
